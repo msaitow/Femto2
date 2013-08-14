@@ -1,0 +1,211 @@
+
+#include <cstring>
+#include <SQcont.hpp>
+#include <SQindex.hpp>
+#include <SQtensor.hpp>
+#include <SQterm.hpp>
+
+#include <boost/assign.hpp>
+
+using namespace std;
+ 
+int main()
+{
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // CID model:
+  // |Psi> := (T0 + 1/2 T2 E2) |Psi_0>
+  // Contravariant basis:
+  //   Sinle-excitation:  <tilde{Psi}_w^a| = <Psi_w^a| 1/2
+  //   Double-excitation: <tilde{Psi}_wy^ab| = [<Psi_wy^ab|2 + <Psi_yw^ab|] / 6 (where w >= y)
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::cout << " ::::: Some test for the contravariant function ::::: " << std::endl;
+    
+    SharedIndex A(new Femto::Core::SQindex("a", Femto::virt      ));
+    SharedIndex B(new Femto::Core::SQindex("b", Femto::virt, true));
+    SharedIndex C(new Femto::Core::SQindex("c", Femto::virt      ));
+    SharedIndex D(new Femto::Core::SQindex("d", Femto::virt, true));
+    
+    SharedIndex I(new Femto::Core::SQindex("i", Femto::act       ));
+    SharedIndex J(new Femto::Core::SQindex("j", Femto::act,  true));
+    SharedIndex K(new Femto::Core::SQindex("k", Femto::act       ));
+    SharedIndex L(new Femto::Core::SQindex("l", Femto::act,  true));
+
+    SharedIndex W(new Femto::Core::SQindex("w", Femto::core      ));
+    SharedIndex X(new Femto::Core::SQindex("x", Femto::core, true));
+    SharedIndex Y(new Femto::Core::SQindex("y", Femto::core      ));
+    SharedIndex Z(new Femto::Core::SQindex("z", Femto::core, true));
+
+//      SharedIndex A(new Femto::Core::SQindex("a", Femto::virt));
+//      SharedIndex B(new Femto::Core::SQindex("b", Femto::virt));
+//      SharedIndex C(new Femto::Core::SQindex("c", Femto::virt));
+//      SharedIndex D(new Femto::Core::SQindex("d", Femto::virt));
+//      
+//      SharedIndex I(new Femto::Core::SQindex("i", Femto::act));
+//      SharedIndex J(new Femto::Core::SQindex("j", Femto::act));
+//      SharedIndex K(new Femto::Core::SQindex("k", Femto::act));
+//      SharedIndex L(new Femto::Core::SQindex("l", Femto::act));
+//  
+//      SharedIndex W(new Femto::Core::SQindex("w", Femto::core));
+//      SharedIndex X(new Femto::Core::SQindex("x", Femto::core));
+//      SharedIndex Y(new Femto::Core::SQindex("y", Femto::core));
+//      SharedIndex Z(new Femto::Core::SQindex("z", Femto::core));
+    
+    SharedIndex P(new Femto::Core::SQindex("p", Femto::gen,  true));
+    SharedIndex Q(new Femto::Core::SQindex("q", Femto::gen,  true));
+    SharedIndex R(new Femto::Core::SQindex("r", Femto::gen,  true));
+    SharedIndex S(new Femto::Core::SQindex("s", Femto::gen,  true));
+    
+    Femto::Core::sfGen EL1(SharedIndices(W, Y, A, C)); // multiplied by 2
+    Femto::Core::sfGen EL2(SharedIndices(Y, W, A, C)); // multiplied by 1
+    Femto::Core::sfGen ER(SharedIndices(B, D, X, Z));
+    
+    Femto::Core::SQtensor Tamp("T2", SharedIndices(X, Z, B, D), Femto::t2_symm());
+
+    SQterms result; result.reserve(Femto::Nterms());
+
+    // Contra1
+    { // One-body part ....	
+      
+      Femto::Core::SQtensor h("h", SharedIndices(P, Q), Femto::h1_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q));
+      
+      // < Psi | EL h EH T2 ER | Psi >
+      SQtensors ten1(EL1, h, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(1.0, Femto::UNITY, ten1);
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);		
+      result += temp;
+      
+      std::cout << " * One-body part only " << std::endl;
+      std::cout << result << std::endl;
+    } // End scope
+
+    { // Two-body part ....
+      
+      Femto::Core::SQtensor V("V2", SharedIndices(P, Q, R, S), Femto::h2_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q, R, S));
+      
+      // < Psi | EL V EH T2 ER | Psi >
+      SQtensors ten1(EL1, V, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(0.5, Femto::UNITY, ten1);
+      
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);	    
+      result += temp;
+    } // End scope
+
+    // Contra2
+    { // One-body part ....	
+      
+      Femto::Core::SQtensor h("h", SharedIndices(P, Q), Femto::h1_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q));
+      
+      // < Psi | EL h EH T2 ER | Psi >
+      SQtensors ten1(EL2, h, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(0.5, Femto::UNITY, ten1);
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);		
+      result += temp;
+      
+      std::cout << " * One-body part only " << std::endl;
+      std::cout << result << std::endl;
+    } // End scope
+
+    { // Two-body part ....
+      
+      Femto::Core::SQtensor V("V2", SharedIndices(P, Q, R, S), Femto::h2_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q, R, S));
+      
+      // < Psi | EL V EH T2 ER | Psi >
+      SQtensors ten1(EL2, V, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(0.25, Femto::UNITY, ten1);
+      
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);	    
+      result += temp;
+    } // End scope
+
+    std::cout << " * Two-body part [Before term combining]" << std::endl;
+    std::cout << result << std::endl << std::endl;
+
+    SQterms result2;
+    Femto::Core::excludeCore(result, &result2, "[c, v]");
+
+    SQterms combined_result2;
+    Femto::Core::combineTerms(result2, &combined_result2);
+    for(auto t = combined_result2.begin();t != combined_result2.end();++t) t->set_numConst(t->get_numConst()/6); // Divided by 6
+
+    std::cout << " * Two-body part only [After term combining]" << std::endl;
+    std::cout << combined_result2 << std::endl << std::endl;
+
+    // Overlap of the contravariant basis
+    {
+      SharedIndex A(new Femto::Core::SQindex("a", Femto::virt));
+      SharedIndex B(new Femto::Core::SQindex("b", Femto::virt));
+      SharedIndex C(new Femto::Core::SQindex("c", Femto::virt));
+      SharedIndex D(new Femto::Core::SQindex("d", Femto::virt));
+
+      SharedIndex W(new Femto::Core::SQindex("w", Femto::core));
+      SharedIndex X(new Femto::Core::SQindex("x", Femto::core));
+      SharedIndex Y(new Femto::Core::SQindex("y", Femto::core));
+      SharedIndex Z(new Femto::Core::SQindex("z", Femto::core));
+
+      Femto::Core::sfGen EL1(SharedIndices(W, Y, A, C)); // multiplied by 2
+      Femto::Core::sfGen EL2(SharedIndices(Y, W, A, C)); // multiplied by 1
+      Femto::Core::sfGen ER(SharedIndices(B, D, X, Z));
+
+      SQterms overlaps;
+      {
+	SQtensors ten1(EL1, ER);
+	SQterms term1(Femto::Core::SQterm(2.0, Femto::UNITY, ten1));
+	Femto::Core::normalOrder(&term1);
+	SQterms result;
+	Femto::Core::excludeCore(term1, &result, "[c, v]");
+
+	overlaps += result; 
+	std::cout << "< Contra1 overlap>" << endl << result << endl; 
+      }    
+      
+      {
+	SQtensors ten1(EL2, ER);
+	SQterms term1(Femto::Core::SQterm(1.0, Femto::UNITY, ten1));
+	Femto::Core::normalOrder(&term1);
+	SQterms result;
+	Femto::Core::excludeCore(term1, &result, "[c, v]");
+
+	overlaps += result; 
+	std::cout << "< Contra2 overlap>" << endl << result << endl; 
+      }    
+      
+      SQterms combined_result;
+      Femto::Core::combineTerms(overlaps, &combined_result);
+
+      for(auto t = combined_result.begin();t != combined_result.end();++t) t->set_numConst(t->get_numConst()/6); // Divided by 6
+      
+      std::cout << "[Contra1 + Contra2] / 6" << endl;
+      std::cout << combined_result << endl;
+    }
+
+}

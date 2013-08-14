@@ -1,0 +1,645 @@
+
+#include <cstring>
+#include <SQcont.hpp>
+#include <SQindex.hpp>
+#include <SQtensor.hpp>
+#include <SQterm.hpp>
+#include <SQcontract.hpp>
+#include <SQreaktor.hpp>
+#include <SQnetwork.hpp>
+#include <SQorz.hpp>
+#include <boost/assign.hpp>
+
+using namespace std;
+
+//#define _External_part
+ 
+int main()
+{
+//*SLEEP*    std::cout << "::::::: SQcont test ::::: " << std::endl; 
+//*SLEEP*    Femto::SQcont<std::string> p;
+//*SLEEP*    Femto::SQcont<int> q;
+//*SLEEP*  
+//*SLEEP*    q <= 1;
+//*SLEEP*    q <= 2;
+//*SLEEP*  
+//*SLEEP*    std::cout << q << std::endl;
+//*SLEEP*  
+//*SLEEP*    p <= std::string("A");
+//*SLEEP*    p <= std::string("A");
+//*SLEEP*    p <= std::string("B");
+//*SLEEP*    p <= std::string("C");
+//*SLEEP*  
+//*SLEEP*    std::cout << "hitotsume : " << p[0] << std::endl;
+//*SLEEP*  
+//*SLEEP*    (std::cout <<= p) << std::endl;
+//*SLEEP*  
+//*SLEEP*    std::cout << "Count A " << p.count("A") << std::endl;
+//*SLEEP*    std::cout << "Count B " << p.count("B") << std::endl;
+//*SLEEP*    std::cout << "Count C " << p.count("C") << std::endl;
+//*SLEEP*    std::cout << "Count D " << p.count("D") << std::endl;
+//*SLEEP*  
+//*SLEEP*    std::cout << "[c,a,v,v]"                            << std::endl;
+//*SLEEP*    std::cout << Femto::GenerateInteractions("[c,v,v]") << std::endl;
+//*SLEEP*    {
+//*SLEEP*      
+//*SLEEP*      SharedIndex A(new Femto::Core::SQindex("a", Femto::virt, true));
+//*SLEEP*      SharedIndex B(new Femto::Core::SQindex("b", Femto::virt)      );
+//*SLEEP*      SharedIndex C(new Femto::Core::SQindex("c", Femto::virt, true));
+//*SLEEP*      SharedIndex D(new Femto::Core::SQindex("d", Femto::virt)      );
+//*SLEEP*      
+//*SLEEP*      SharedIndex I(new Femto::Core::SQindex("i", Femto::act)       );
+//*SLEEP*      SharedIndex J(new Femto::Core::SQindex("j", Femto::act)       );
+//*SLEEP*      SharedIndex K(new Femto::Core::SQindex("k", Femto::act)       );
+//*SLEEP*      SharedIndex L(new Femto::Core::SQindex("l", Femto::act)       );
+//*SLEEP*  
+//*SLEEP*      SharedIndices inds;
+//*SLEEP*  
+//*SLEEP*      ////////////////////////////////////////
+//*SLEEP*      inds <= I;
+//*SLEEP*      inds <= K;
+//*SLEEP*      inds <= A;
+//*SLEEP*      inds <= C;
+//*SLEEP*      ////////////////////////////////////////
+//*SLEEP*  
+//*SLEEP*      std::cout << "::::::::::: SharedIndex Test :::::::::::::" << std::endl;
+//*SLEEP*      std::cout << "i  " <<  inds[0] << std::endl << std::endl;
+//*SLEEP*      std::cout << "i  " << *inds[0] << std::endl << std::endl;
+//*SLEEP*  
+//*SLEEP*      std::cout << "::::::::::: Tensor Test ::::::::::::::::::" << std::endl;
+//*SLEEP*      Femto::Core::SQtensor T2("A2", inds, Femto::t2_symm());
+//*SLEEP*      std::cout << "A2 ::: " << T2 << std::endl;
+//*SLEEP*  
+//*SLEEP*      std::cout << "::::::::::: Term Test ::::::::::::::::::::" << std::endl;
+//*SLEEP*      SharedIndices inds2;
+//*SLEEP*  
+//*SLEEP*      ////////////////////////////////////////
+//*SLEEP*      inds2 <= A;
+//*SLEEP*      inds2 <= C;
+//*SLEEP*      inds2 <= J;
+//*SLEEP*      inds2 <= L;
+//*SLEEP*      ////////////////////////////////////////
+//*SLEEP*  
+//*SLEEP*      Femto::Core::SQtensor U2("B2", inds2, Femto::t2_symm());
+//*SLEEP*      std::cout << "B2 ::: " << U2 << std::endl;
+//*SLEEP*  
+//*SLEEP*      SQtensors tensors;
+//*SLEEP*      tensors <= T2;
+//*SLEEP*      tensors <= U2;
+//*SLEEP*  
+//*SLEEP*      Femto::SQcont<std::string> coeff;
+//*SLEEP*  
+//*SLEEP*      Femto::Core::SQterm Term(1.0, coeff, tensors);
+//*SLEEP*      std::cout << ":::::: Before :::::" << std::endl;
+//*SLEEP*      std::cout << "Term :: " << Term << std::endl;
+//*SLEEP*      std::cout << "<SummedBody>" << std::endl;
+//*SLEEP*      Term.print_summedBody();
+//*SLEEP*      std::cout << std::endl; 
+//*SLEEP*  
+//*SLEEP*      /////////////////////////////////////////
+//*SLEEP*      Femto::SQcont<SharedIndex> vecs(Term.get_summedBody());
+//*SLEEP*      for(auto i = vecs.begin();i != vecs.end();++i)
+//*SLEEP*        if(**i == *A) (*i)->switch_isExt(true);
+//*SLEEP*      /////////////////////////////////////////
+//*SLEEP*  
+//*SLEEP*      std::cout << ":::::: After :::::" << std::endl;
+//*SLEEP*      std::cout << "Term :: " << Term << std::endl;
+//*SLEEP*      std::cout << "<SummedBody>" << std::endl;
+//*SLEEP*      Term.print_summedBody();
+//*SLEEP*      std::cout << std::endl; 
+//*SLEEP*  
+//*SLEEP*      std::cout << ":::::: After 2 :::::" << std::endl;
+//*SLEEP*      Term.masquerade();
+//*SLEEP*      std::cout << "Term :: " << Term << std::endl;
+//*SLEEP*      std::cout << "<SummedBody>" << std::endl;
+//*SLEEP*      Term.print_summedBody();
+//*SLEEP*      std::cout << std::endl << std::endl; 
+//*SLEEP*  
+//*SLEEP*      std::cout << ":::::: About each tensor ::::::" << std::endl;
+//*SLEEP*      {
+//*SLEEP*        SQtensors tens(Term.get_tensors());
+//*SLEEP*        for(auto t = tens.begin();t != tens.end();++t){
+//*SLEEP*  	std::cout << "T :: " << *t << std::endl;
+//*SLEEP*  	SharedIndices inds(t->get_indices());
+//*SLEEP*  	for(auto i = inds.begin();i != inds.end();++i) std::cout << "  >> " << **i << " : " << ((*i)->get_isExt() ? "E" : "I") << std::endl;
+//*SLEEP*        }
+//*SLEEP*      }
+//*SLEEP*  
+//*SLEEP*      std::cout << ":::::::::::::::: NormalOrdering Test :::::::::::::::: " << std::endl;
+//*SLEEP*  
+//*SLEEP*      Femto::SQcont<Femto::Core::SQtensor> tens;
+//*SLEEP*  
+//*SLEEP*      Femto::SQcont<SharedIndex> Rinds;
+//*SLEEP*      Rinds <= J; 
+//*SLEEP*      Rinds <= L;  
+//*SLEEP*      Rinds <= B; 
+//*SLEEP*      Rinds <= D;
+//*SLEEP*      tens <= Femto::Core::sfGen(Rinds);
+//*SLEEP*  
+//*SLEEP*      Femto::SQcont<SharedIndex> Linds;
+//*SLEEP*      Linds <= A; 
+//*SLEEP*      Linds <= C;
+//*SLEEP*      Linds <= I; 
+//*SLEEP*      Linds <= K;  
+//*SLEEP*      tens <= Femto::Core::sfGen(Linds);
+//*SLEEP*  
+//*SLEEP*      Femto::SQcont<Femto::Core::SQterm> terms;
+//*SLEEP*      //Femto::SQcont<std::string> coeff;
+//*SLEEP*      terms <= Femto::Core::SQterm(1.0, coeff, tens);
+//*SLEEP*      std::cout << "term : " << terms[0] << std::endl << std::endl;
+//*SLEEP*  
+//*SLEEP*      Femto::Core::normalOrder(&terms);
+//*SLEEP*      std::cout << terms << std::endl; 
+//*SLEEP*      std::cout << std::endl;
+//*SLEEP*  
+//*SLEEP*      std:cout << ":::::: Gen test ::::: " << std::endl;
+//*SLEEP*      SharedIndices XI;
+//*SLEEP*      XI <= SharedIndex(new Femto::Core::SQindex("p", Femto::gen));
+//*SLEEP*      XI <= SharedIndex(new Femto::Core::SQindex("q", Femto::gen));
+//*SLEEP*      XI <= SharedIndex(new Femto::Core::SQindex("r", Femto::gen));
+//*SLEEP*      XI <= SharedIndex(new Femto::Core::SQindex("b", Femto::virt));
+//*SLEEP*  
+//*SLEEP*      SQtensors XT;
+//*SLEEP*      XT <= Femto::Core::RDM(XI);
+//*SLEEP*      Femto::Core::SQterm XTT(1.0, coeff, XT);
+//*SLEEP*      SQterms outT;
+//*SLEEP*      Femto::Core::decomposeRDMGen(XTT, &outT);
+//*SLEEP*  
+//*SLEEP*      std::cout << " ::::: TERM (org) ::::: " << XTT << std::endl;
+//*SLEEP*      XTT.print_summedBody();
+//*SLEEP*      Femto::Core::SQterm YTT(XTT);
+//*SLEEP*      std::cout << " ::::: TERM (cpy) ::::: " << YTT << std::endl;
+//*SLEEP*      YTT.print_summedBody();
+//*SLEEP*  
+//*SLEEP*      std::cout << std::endl;
+//*SLEEP*      std::cout << " ::::: Index exchange test ::::: " << std::endl;
+//*SLEEP*      SharedIndex G(new Femto::Core::SQindex("PPP", Femto::gen));
+//*SLEEP*      SharedIndices Inds(YTT.get_summedBody());
+//*SLEEP*      std::cout << "Inds[0]->> " << *Inds[0] << std::endl;
+//*SLEEP*      std::cout << "Replaced by " << *G << std::endl;
+//*SLEEP*      *(Inds[0]) = *G;
+//*SLEEP*      std::cout << "After shanged ..... " << std::endl;
+//*SLEEP*      std::cout << YTT << std::endl;
+//*SLEEP*      std::cout << "Copy it to the other term ..... " << std::endl;
+//*SLEEP*      Femto::Core::SQterm ZTT(YTT);
+//*SLEEP*      std::cout << ZTT << std::endl;
+//*SLEEP* 
+//*SLEEP*    } // End scope
+
+//*SLEEP*    {
+//*SLEEP*      std::cout << std::endl;
+//*SLEEP*      std::cout << " ::::: sortIndices ::::: " << std::endl;
+//*SLEEP*      
+//*SLEEP*      SharedIndex P(new Femto::Core::SQindex("p", Femto::gen)       );
+//*SLEEP*      SharedIndex Q(new Femto::Core::SQindex("k", Femto::act)       );
+//*SLEEP*      SharedIndex R(new Femto::Core::SQindex("r", Femto::gen)       );
+//*SLEEP*      SharedIndex S(new Femto::Core::SQindex("k", Femto::act)       );
+//*SLEEP*      
+//*SLEEP*      Femto::Core::SQtensor ERI1("V2", SharedIndices(R, S, P, Q), Femto::h2_symm());
+//*SLEEP*      Femto::Core::SQtensor ERI2("V2", SharedIndices(R, Q, P, S), Femto::h2_symm());
+//*SLEEP*      std::cout << " ERI1, " << ERI1 << std::endl;
+//*SLEEP*      std::cout << " ERI2, " << ERI2 << std::endl;
+//*SLEEP*      std::cout << "After sorted .... " << std::endl;
+//*SLEEP*      ERI1.sortIndices();
+//*SLEEP*      ERI2.sortIndices();
+//*SLEEP*      std::cout << " ERI1, " << ERI1 << std::endl;
+//*SLEEP*      std::cout << " ERI2, " << ERI2 << std::endl;
+//*SLEEP*      std::cout << "Are they in the same form ..... ";
+//*SLEEP*      std::cout << (are_sameforms(ERI1, ERI2) ? "Yes" : "No") << std::endl << std::endl;     
+//*SLEEP*    } // End scope
+
+#ifdef _External_part
+  {
+    std::cout << " ::::: External / External Test (Partial) ::::: " << std::endl;
+
+    SharedIndices EL_indices;
+    SharedIndices ER_indices;
+    SharedIndices ET_indices;
+    
+    SharedIndex A(new Femto::Core::SQindex("a", Femto::virt)      );
+    SharedIndex B(new Femto::Core::SQindex("b", Femto::virt, true));
+    SharedIndex C(new Femto::Core::SQindex("c", Femto::virt)      );
+    SharedIndex D(new Femto::Core::SQindex("d", Femto::virt, true));
+    
+    SharedIndex I(new Femto::Core::SQindex("i", Femto::act)      );
+    SharedIndex J(new Femto::Core::SQindex("j", Femto::act, true));
+    SharedIndex K(new Femto::Core::SQindex("k", Femto::act)      );
+    SharedIndex L(new Femto::Core::SQindex("l", Femto::act, true));
+    
+    SharedIndices Ps;
+    SharedIndices Qs;
+    SharedIndices Rs;
+    SharedIndices Ss;
+    for(size_t space = 0;space < 3;++space){
+      Ps <= SharedIndex(new Femto::Core::SQindex("p", (Femto::char_state)space, true));
+      Qs <= SharedIndex(new Femto::Core::SQindex("q", (Femto::char_state)space, true));
+      Rs <= SharedIndex(new Femto::Core::SQindex("r", (Femto::char_state)space, true));
+      Ss <= SharedIndex(new Femto::Core::SQindex("s", (Femto::char_state)space, true));
+    }
+    
+    EL_indices <= I;
+    EL_indices <= K;  
+    EL_indices <= A;
+    EL_indices <= C;  
+    
+    ER_indices <= B;
+    ER_indices <= D;
+    ER_indices <= J;
+    ER_indices <= L;
+    
+    ET_indices <= J;
+    ET_indices <= L;
+    ET_indices <= B;
+    ET_indices <= D;
+
+    Femto::Core::sfGen EL(EL_indices);
+    Femto::Core::sfGen ER(ER_indices);
+    
+    std::cout << "EL =>" << EL << std::endl;
+    std::cout << "ER =>" << ER << std::endl << std::endl;
+
+    // T2 amplitude
+    Femto::Core::SQtensor Tamp("T2", ET_indices, Femto::t2_symm());
+
+    // Unit coefficient
+    Femto::SQcont<string> coeff1;
+
+    SQterms result; result.reserve(Femto::Nterms());
+
+    // One-body part ....
+    for(auto p = Ps.begin();p != Ps.end();++p){
+      for(auto q = Qs.begin();q != Qs.end();++q){
+	
+	SharedIndices EH_indices;
+	EH_indices <= *p;
+	EH_indices <= *q;
+
+	Femto::Core::SQtensor h("h", EH_indices, Femto::h1_symm());
+	Femto::Core::sfGen EH(EH_indices);
+	
+	// < Psi | EL h EH T2 ER | Psi >
+	SQtensors ten1;
+	ten1 <= EL;
+	ten1 <= h;
+	ten1 <= EH;
+	ten1 <= Tamp;
+	ten1 <= ER;
+
+	Femto::Core::SQterm term1(1.0, coeff1, ten1);
+	SQterms batch; batch <= term1;
+
+	Femto::Core::normalOrder(&batch); 
+
+	SQterms temp;
+	Femto::Core::processTerms(batch, &temp);		
+	result += temp;
+	
+      } // End q
+    } // End p
+
+    std::cout << " * One-body part only " << std::endl;
+    std::cout << result << std::endl;
+    
+    // Two-body part ....
+    for(auto p = Ps.begin();p != Ps.end();++p){
+      for(auto q = Qs.begin();q != Qs.end();++q){
+	for(auto r = Rs.begin();r != Rs.end();++r){
+	  for(auto s = Ss.begin();s != Ss.end();++s){
+	    
+	    SharedIndices EH_indices;
+	    EH_indices <= *p;
+	    EH_indices <= *q;
+	    EH_indices <= *r;
+	    EH_indices <= *s;
+	    
+	    Femto::Core::SQtensor V("V2", EH_indices, Femto::h2_symm());
+	    Femto::Core::sfGen EH(EH_indices);
+	    
+	    // < Psi | EL V EH T2 ER | Psi >
+	    SQtensors ten1;
+	    ten1 <= EL;
+	    ten1 <= V;
+	    ten1 <= EH;
+	    ten1 <= Tamp;
+	    ten1 <= ER;
+	    
+	    Femto::Core::SQterm term1(0.5, coeff1, ten1);
+	    
+	    SQterms batch; batch <= term1;
+
+	    Femto::Core::normalOrder(&batch); 
+
+	    SQterms temp;
+	    Femto::Core::processTerms(batch, &temp);	    
+	    result += temp;
+	    
+	  } // End s
+	} // End r
+      } // End q
+    } // End p
+
+    std::cout << " * Two-body part only [Before term combining]" << std::endl;
+    std::cout << result << std::endl << std::endl;
+
+    SQterms result2;
+    Femto::Core::excludeCore(result, &result2);
+
+    SQterms combined_result2;
+    Femto::Core::combineTerms(result2, &combined_result2);
+
+    std::cout << " * Two-body part only [After term combining]" << std::endl;
+    std::cout << combined_result2 << std::endl << std::endl;
+    
+  } // End scope
+#else
+  {
+    std::cout << " ::::: External / External Test (New) ::::: " << std::endl;
+    
+    SharedIndex A(new Femto::Core::SQindex("a", Femto::virt      ));
+    SharedIndex B(new Femto::Core::SQindex("b", Femto::virt, true));
+    SharedIndex C(new Femto::Core::SQindex("c", Femto::virt      ));
+    SharedIndex D(new Femto::Core::SQindex("d", Femto::virt, true));
+    
+    SharedIndex I(new Femto::Core::SQindex("i", Femto::act       ));
+    SharedIndex J(new Femto::Core::SQindex("j", Femto::act,  true));
+    SharedIndex K(new Femto::Core::SQindex("k", Femto::act       ));
+    SharedIndex L(new Femto::Core::SQindex("l", Femto::act,  true));
+    
+    SharedIndex P(new Femto::Core::SQindex("p", Femto::gen,  true));
+    SharedIndex Q(new Femto::Core::SQindex("q", Femto::gen,  true));
+    SharedIndex R(new Femto::Core::SQindex("r", Femto::gen,  true));
+    SharedIndex S(new Femto::Core::SQindex("s", Femto::gen,  true));
+    
+    Femto::Core::sfGen EL(SharedIndices(I, K, A, C));
+    Femto::Core::sfGen ER(SharedIndices(B, D, J, L));
+    
+    std::cout << "EL => " << EL << std::endl;
+    std::cout << "ER => " << ER << std::endl << std::endl;
+
+    // T2 amplitude
+    Femto::Core::SQtensor Tamp("T2", SharedIndices(J, L, B, D), Femto::t2_symm());
+
+    SQterms result; result.reserve(Femto::Nterms());
+
+    { // One-body part ....	      
+      Femto::Core::SQtensor h("h", SharedIndices(P, Q), Femto::h1_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q));
+      
+      // < Psi | EL h EH T2 ER | Psi >
+      SQtensors ten1(EL, h, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(1.0, Femto::UNITY, ten1);
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);		
+      result += temp;
+      
+      std::cout << " * One-body part only " << std::endl;
+      std::cout << result << std::endl;
+    } // End scope
+
+    { // Two-body part ....
+      
+      Femto::Core::SQtensor V("V2", SharedIndices(P, Q, R, S), Femto::h2_symm());
+      Femto::Core::sfGen EH(SharedIndices(P, Q, R, S));
+      
+      // < Psi | EL V EH T2 ER | Psi >
+      SQtensors ten1(EL, V, EH, Tamp, ER);
+      
+      Femto::Core::SQterm term1(0.5, Femto::UNITY, ten1);
+      
+      SQterms batch(term1);
+      
+      Femto::Core::normalOrder(&batch); 
+      
+      SQterms temp;
+      Femto::Core::processTerms(batch, &temp);	    
+      result += temp;
+    } // End scope
+
+    std::cout << " * Two-body part [Before term combining]" << std::endl;
+    std::cout << result << std::endl << std::endl;
+
+    SQterms result2;
+    Femto::Core::excludeCore(result, &result2, "[c,a,v]");
+
+    SQterms combined_result2;
+    Femto::Core::combineTerms(result2, &combined_result2);
+
+    std::cout << " * Two-body part only [After term combining]" << std::endl;
+    std::cout << combined_result2 << std::endl << std::endl;
+
+    Femto::Core::makeFock(combined_result2);    
+
+    ////////////////// TEST (BinaryDEcomposition) //////////////////////
+    {
+      Femto::Core::SQtensor sig("S2", SharedIndices(I, K, A, C), Femto::t2_symm());
+      SQcontracts conts;
+      for(auto t = combined_result2.begin(); t != combined_result2.end();++t) conts <= Femto::Core::SQcontract(sig, *t);
+      for(auto c = conts.begin();c != conts.end();++c){
+	std::cout << *c << endl;
+	c->print_summedBody();
+	std::cout << std::endl; 
+      } // End c
+      //std::cout << conts << endl;
+      Femto::SQcont<SQbinaries> bins;
+
+      Femto::Reaktor::BinaryDecomposition(conts, bins, Femto::Reaktor::ERI);
+      std::cout << " >> ===================================================== << " << std::endl;
+      for(auto c = bins.cbegin();c != bins.cend();++c) std::cout << " -- @@ -- " << std::endl << *c << std::endl;
+      std::cout << std::endl;
+    //////////////////////////////////////////////
+
+    ////////////////// TREE /////////////////////////
+    { 
+      tree<string> tr;
+      tree<string>::iterator top, one, two, loc, banana;
+      
+      top=tr.begin();
+      one=tr.insert(top, "one");
+      two=tr.append_child(one, "two");
+      tr.append_child(two, "apple");
+      banana=tr.append_child(two, "banana");
+      tree<string>::iterator cherry(tr.append_child(banana,"cherry"));
+      tr.append_child(two, "peach");
+      tr.append_child(one,"three");
+      tr.append_child(cherry, "mine");
+      
+      tree<string>::iterator here(tr.insert(top, "One"));
+      here = tr.append_child(here, "The child");
+      tr.append_child(here, "China");
+      tree<string>::iterator mom(tr.append_child(here, "Japan"));
+      tr.append_child(mom, "MOM");
+      Femto::Core::printTree(tr);
+      std::cout << endl << endl;
+    }
+    ////////////////// TREE /////////////////////////
+
+    ////////////////// TEST (SQnetwork) //////////////////////
+      Femto::SQcont<int> int1( 1, 2, 3, 7, 6,12);
+      Femto::SQcont<int> int2( 0, 2,10,11);
+      Femto::SQcont<int> int3( 9,99, 3,14);
+      Femto::SQcont<int> int4( 1,88,77,66);
+      std::cout << " -- int1 -- " << endl << int1 << endl;
+      tree<int> tr1;
+      Femto::Core::WeaveNet(int1, tr1);
+      kptree::print_tree_bracketed(tr1);
+      std::cout << endl;
+      Femto::Core::printTree(tr1);
+      
+      std::cout << endl;
+      std::cout << "== Merge test == " << endl;
+      tree<int> nints;
+      Femto::SQcont<Femto::SQcont<int> > ints;
+      ints <= int1; 
+      ints <= int2;
+      ints <= int3;
+      ints <= int4;
+      Femto::Core::WeaveNets(ints, nints);
+      Femto::Core::printTree(nints);
+      std::cout << "@@@@@@@@@ " << endl;  
+      std::cout << endl;
+      Femto::Core::mergeNodes(nints);
+      //tree<int>::iterator zero = find(nints.begin(), nints.end(), 0);
+      //nints.erase(zero);
+      Femto::Core::printTree(nints); 
+      std::cout << "================ " << endl << endl;
+
+      kptree::print_tree_bracketed(nints);
+      std::cout << endl;
+      std::cout << endl;
+
+      std::cout << std::endl;
+      BinaryNet bn;
+      Femto::Core::WeaveNet(*(bins.begin()+3), bn);
+      Femto::Core::printTree(bn);
+      std::cout << std::endl;
+
+      std::cout << std::endl;
+      std::cout << " -- WeaveNets -- " << std::endl;
+      BinaryNet bs;
+      Femto::Core::WeaveNets(bins, bs);
+      Femto::Core::printTree(bs);
+      std::cout << std::endl;
+
+      {
+	std::cout << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+	std::cout << "// Binary Test" << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+	std::cout << " << B  >> " << bins[0][0] << std::endl;
+	Femto::Core::SQbinary bin1 = bins[0][0];
+	Femto::Core::SQbinary bin2 = bins[0][0];
+	std::cout << " << A1 >> " << bin1 << std::endl;
+	std::cout << " << A2 >> " << bin2 << std::endl << std::endl;
+	std::cout << " --> " << bin1 << std::endl; 
+	std::cout << " --> " << bin2 << std::endl; 
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " <-----> " << (bins[0][0] == bins[0][0] ? "Yy" : "Nn") << std::endl;
+	std::cout << " <-----> " << (bin1 == bin1 ? "Yy" : "Nn") << std::endl;
+	std::cout << " <-----> " << (bin2 == bin2 ? "Yy" : "Nn") << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+      }
+      {
+	std::cout << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+	std::cout << "// Contract Test" << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+	std::cout << " << B  >> " << bins[0][0] << std::endl;
+	Femto::Core::SQcontract bin1 = bins[0][0];
+	Femto::Core::SQcontract bin2 = bins[0][0];
+	std::cout << " << A1 >> " << bin1 << std::endl;
+	std::cout << " << A2 >> " << bin2 << std::endl << std::endl;
+	std::cout << " --> " << bin1 << std::endl; 
+	std::cout << " --> " << bin2 << std::endl; 
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " ------> " << (bin1 == bin2 ? "Y" : "N") << std::endl;
+	std::cout << " <-----> " << (bins[0][0] == bins[0][0] ? "Yy" : "Nn") << std::endl;
+	std::cout << " <-----> " << (bin1 == bin1 ? "Yy" : "Nn") << std::endl;
+	std::cout << " <-----> " << (bin2 == bin2 ? "Yy" : "Nn") << std::endl;
+	std::cout << "////////////////////////////" << std::endl;
+      }
+
+      std::cout << std::endl;
+      Femto::Core::mergeNodes(bs);
+      Femto::Core::printTree(bs);
+      std::cout << std::endl;
+
+      { // Merging test for BinaryNet 
+	std::cout << " >====== BinaryNet ======< " << std::endl;
+	Femto::Core::SQbinary bin(bins[3][0]);
+	std::cout << bin << std::endl;
+	Femto::SQcont<SQbinaries> Bins;
+	SQbinaries bin1; bin1 <= bin;
+	bin1 <= bins[3][1];
+	std::cout << " bin1 " << std::endl;
+	std::cout << bin1 << std::endl;
+	SQbinaries bin2; bin2 <= bin;
+	SQtensors tens;
+	tens <= Femto::Core::SQtensor("A", bin1[1].get_Rtensors()[0].get_indices(), Femto::h1_symm());
+	tens <= bin1[1].get_Rtensors()[1];
+	bin2 <= Femto::Core::SQbinary(1.0, Femto::UNITY, bin1[1].get_Ltensor(), tens);
+	std::cout << " bin2 " << std::endl;
+	std::cout << bin2 << std::endl;
+	Bins <= bin1;
+	Bins <= bin2;
+	BinaryNet Bn;
+	Femto::Core::WeaveNets(Bins, Bn);
+	Femto::Core::printTree(Bn);
+	std::cout << std::endl;
+	Femto::Core::mergeNodes(Bn);
+	Femto::Core::printTree(Bn);
+	std::cout << std::endl;
+      }
+
+      { // Merging test for ContraNet 
+	std::cout << " >====== ContraNet ======< " << std::endl;
+	Femto::Core::SQcontract bin(bins[3][0]);
+	std::cout << bin << std::endl;
+	Femto::SQcont<SQcontracts> Bins;
+	SQcontracts bin1; bin1 <= bin;
+	bin1 <= bins[3][1];
+	std::cout << " bin1 " << std::endl;
+	std::cout << bin1 << std::endl;
+	SQcontracts bin2; bin2 <= bin;
+	SQtensors tens;
+	tens <= Femto::Core::SQtensor("A", bin1[1].get_Rtensors()[0].get_indices(), Femto::h1_symm());
+	tens <= bin1[1].get_Rtensors()[1];
+	bin2 <= Femto::Core::SQbinary(1.0, Femto::UNITY, bin1[1].get_Ltensor(), tens);
+	std::cout << " bin2 " << std::endl;
+	std::cout << bin2 << std::endl;
+	Bins <= bin1;
+	Bins <= bin2;
+	ContraNet Bn;
+	Femto::Core::WeaveNets(Bins, Bn);
+	Femto::Core::printTree(Bn);
+	std::cout << std::endl;
+	Femto::Core::mergeNodes(Bn);
+	Femto::Core::printTree(Bn);
+	std::cout << std::endl;
+
+	Femto::Reaktor::Orz::SetIndicesNet(Bn);
+
+      }
+
+    }
+    //////////////////////////////////////////////
+
+  } // End scope
+#endif
+
+}

@@ -1,0 +1,180 @@
+
+#include <cstring>
+#include <SQcont.hpp>
+#include <SQindex.hpp>
+#include <SQtensor.hpp>
+#include <SQterm.hpp>
+
+#define _COMM
+
+using namespace std;
+ 
+int main()
+{
+
+  {
+    std::cout << " ::::: Semiinternal / Semiinternal Test ::::: " << std::endl;
+
+    SharedIndices EL_indices;
+    SharedIndices ER_indices;
+    SharedIndices ET_indices;
+    
+    SharedIndex A(new Femto::Core::SQindex("a", Femto::virt      ));
+    SharedIndex B(new Femto::Core::SQindex("b", Femto::virt, true));
+    
+    SharedIndex I(new Femto::Core::SQindex("i", Femto::act      ));
+    SharedIndex J(new Femto::Core::SQindex("j", Femto::act      ));
+    SharedIndex K(new Femto::Core::SQindex("k", Femto::act      ));
+    SharedIndex L(new Femto::Core::SQindex("l", Femto::act, true));
+    SharedIndex M(new Femto::Core::SQindex("m", Femto::act, true));
+    SharedIndex N(new Femto::Core::SQindex("n", Femto::act, true));
+    
+    SharedIndices Ps;
+    SharedIndices Qs;
+    SharedIndices Rs;
+    SharedIndices Ss;
+    for(size_t space = 0;space < 3;++space){
+      Ps <= SharedIndex(new Femto::Core::SQindex("p", (Femto::char_state)space, true));
+      Qs <= SharedIndex(new Femto::Core::SQindex("q", (Femto::char_state)space, true));
+      Rs <= SharedIndex(new Femto::Core::SQindex("r", (Femto::char_state)space, true));
+      Ss <= SharedIndex(new Femto::Core::SQindex("s", (Femto::char_state)space, true));
+    }
+    
+    EL_indices <= I;
+    EL_indices <= J;  
+    EL_indices <= K;
+    EL_indices <= A;  
+    
+    ER_indices <= L;
+    ER_indices <= B;
+    ER_indices <= M;
+    ER_indices <= N;
+    
+    ET_indices <= M;
+    ET_indices <= N;
+    ET_indices <= L;
+    ET_indices <= B;
+
+    Femto::Core::sfGen EL(EL_indices);
+    Femto::Core::sfGen ER(ER_indices);
+
+    std::cout << "EL => " << EL << std::endl;
+    std::cout << "ER => " << ER << std::endl << std::endl;
+
+    // T2 amplitude
+    Femto::Core::SQtensor Tamp("T2", ET_indices, Femto::t2_symm());
+
+    // Unit coefficient
+    Femto::SQcont<string> coeff1;
+
+    SQterms result; 
+    result.reserve(Femto::Nterms());
+
+    // One-body part ....
+    for(auto p = Ps.begin();p != Ps.end();++p){
+      for(auto q = Qs.begin();q != Qs.end();++q){
+	
+	SharedIndices EH_indices;
+	EH_indices <= *p;
+	EH_indices <= *q;
+
+	Femto::Core::SQtensor h("h", EH_indices, Femto::h1_symm());
+	Femto::Core::sfGen EH(EH_indices);
+	
+	// < Psi | EL h EH T2 ER | Psi >
+	SQtensors ten1;
+	ten1 <= EL;
+	ten1 <= h;
+	ten1 <= EH;
+	ten1 <= Tamp;
+	ten1 <= ER;
+	
+	Femto::Core::SQterm term1(1.0, coeff1, ten1);
+	SQterms batch; batch <= term1;
+
+	Femto::Core::normalOrderComm(&batch); 
+
+	SQterms temp;
+	Femto::Core::processTerms(batch, &temp);		
+	result += temp;
+	
+      } // End q
+    } // End p
+
+    std::cout << " * One-body part only " << std::endl;
+    std::cout << result << std::endl;
+    
+    // Two-body part ....
+    for(auto p = Ps.begin();p != Ps.end();++p){
+      for(auto q = Qs.begin();q != Qs.end();++q){
+	for(auto r = Rs.begin();r != Rs.end();++r){
+	  for(auto s = Ss.begin();s != Ss.end();++s){
+	    
+	    SharedIndices EH_indices;
+	    EH_indices <= *p;
+	    EH_indices <= *q;
+	    EH_indices <= *r;
+	    EH_indices <= *s;
+	    
+	    Femto::Core::SQtensor V("V2", EH_indices, Femto::h2_symm());
+	    Femto::Core::sfGen EH(EH_indices);
+	    
+	    // < Psi | EL V EH T2 ER | Psi >
+	    SQtensors ten1;
+	    ten1 <= EL;
+	    ten1 <= V;
+	    ten1 <= EH;
+	    ten1 <= Tamp;
+	    ten1 <= ER;
+	    
+	    Femto::Core::SQterm term1(0.5, coeff1, ten1);
+	    
+	    SQterms batch; batch <= term1;
+
+	    Femto::Core::normalOrderComm(&batch); 
+
+	    SQterms temp;
+	    Femto::Core::processTerms(batch, &temp);	    
+	    result += temp;
+
+	  } // End s
+	} // End r
+      } // End q
+    } // End p
+
+   // Zeroth-body part
+   // Ecas < Psi | EL T2 ER | Psi >
+   {
+     SQtensors ten;
+     ten <= EL;
+     ten <= Tamp;
+     ten <= ER;
+   
+     Femto::SQcont<std::string> Ecas;
+     Ecas <= "Ecas";
+   
+     Femto::Core::SQterm term(1.0, Ecas, ten);
+     SQterms batch; batch <= term;
+     Femto::Core::normalOrder(&batch);
+
+     SQterms temp;
+     Femto::Core::processTerms(batch, &temp);
+   
+     result += temp;
+   }
+
+    std::cout << " * Two-body part only [Before term combining]" << std::endl;
+    std::cout << result << std::endl << std::endl << std::endl;
+
+    SQterms result2;
+    Femto::Core::excludeCore(result, &result2);
+
+    SQterms combined_result2;
+    Femto::Core::combineTerms(result2, &combined_result2);
+
+    std::cout << " * Two-body part only [After term combining]" << std::endl;
+    std::cout << combined_result2 << std::endl << std::endl;
+    
+  } // End scope
+  
+}
