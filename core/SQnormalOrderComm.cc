@@ -107,12 +107,16 @@ namespace Femto { namespace Core {
     for(auto e1 = sfGen_list.begin();e1 != sfGen_list.end();++e1){
       // Seek in upper side indices
       for(size_t num_i = 0;num_i < e1->get_indices().size()/2;++num_i)
-	if     (e1->get_indices()[num_i]->get_char() == core) ++upp_cv.first;
-	else if(e1->get_indices()[num_i]->get_char() == virt) ++upp_cv.second;
+	if     (e1->get_indices()[num_i]->get_char() == core || 
+		e1->get_indices()[num_i]->get_char() == gen) ++upp_cv.first;
+	else if(e1->get_indices()[num_i]->get_char() == virt ||
+		e1->get_indices()[num_i]->get_char() == gen) ++upp_cv.second;
       // Seek in lower side indices
       for(size_t num_i = e1->get_indices().size()/2;num_i < e1->get_indices().size();++num_i)
-	if     (e1->get_indices()[num_i]->get_char() == core) ++low_cv.first;
-	else if(e1->get_indices()[num_i]->get_char() == virt) ++low_cv.second;
+	if     (e1->get_indices()[num_i]->get_char() == core || 
+		e1->get_indices()[num_i]->get_char() == gen) ++low_cv.first;
+	else if(e1->get_indices()[num_i]->get_char() == virt || 
+		e1->get_indices()[num_i]->get_char() == gen) ++low_cv.second;
     } // End e1
     if(upp_cv.first != low_cv.first || upp_cv.second != low_cv.second) { 
       inTerms->erase(inTerms->begin());
@@ -298,20 +302,22 @@ namespace Femto { namespace Core {
                  for(auto ten = tensorList.begin();ten != tensorList.end();++ten){
                    if(is_sfGen(ten->get_name())) { ++Ecount; ten_E = ten; }
                  } // End ten
-                 bool isVanished = false;
+                 bool isVanished(false);
+		 bool hasGen(false);
                  if(Ecount==0 || Ecount==1) {
                    pair<int, int> numCore(0, 0); // Represents the number of core indices appear on the upper and lower case of the sfGen
                    //numCore.first = 0; numCore.second = 0;
-                   SQcont<SharedIndex> ind(ten_E->get_indices());
+                   SharedIndices ind(ten_E->get_indices());
                    for(auto I = ind.begin();I != ind.end();++I){
-                     if((*I)->get_char()==virt) isVanished = true;
-                     else if((*I)->get_char()==core && (size_t)(I-ind.begin()) <  (ten_E->get_indices().size())/2) 
-                       ++numCore.first;
-                     else if((*I)->get_char()==core && (size_t)(I-ind.begin()) >= (ten_E->get_indices().size())/2) 
-                       ++numCore.second;
+                     if((*I)->get_char() == Femto::virt) isVanished = true;
+//                      else if((*I)->get_char()==core && (size_t)(I-ind.begin()) <  (ten_E->get_indices().size())/2) 
+//                        ++numCore.first;
+//                      else if((*I)->get_char()==core && (size_t)(I-ind.begin()) >= (ten_E->get_indices().size())/2) 
+//                        ++numCore.second;
+		     //else if((*I)->get_char() == Femto::gen) hasGen = true;
                      if(isVanished) break;
 		   } // End I
-                   if(numCore.first != numCore.second) isVanished = true;
+                   //if(numCore.first != numCore.second && !hasGen) isVanished = true;
                  } // End if
                  if(!isVanished)
                    { iter_terms.push_back(SQterm(t->get_numConst(), term1.get_Consts(), tensorList)); }
@@ -448,20 +454,22 @@ namespace Femto { namespace Core {
                  for(auto ten = tensorList.begin();ten != tensorList.end();++ten){
                    if(is_sfGen(ten->get_name())) { ++Ecount; ten_E = ten; }
                  } // End ten
-                 bool isVanished = false;
+                 bool isVanished(false);
+		 bool hasGen(false);
                  if(Ecount==0 || Ecount==1) {
                    pair<int, int> numCore(0, 0); // Represents the number of core indices appear on the upper and lower case of the sfGen
                    //numCore.first = 0; numCore.second = 0;
-                   SQcont<SharedIndex> ind(ten_E->get_indices());
+                   SharedIndices ind(ten_E->get_indices());
                    for(auto I = ind.begin();I != ind.end();++I){
-                     if((*I)->get_char()==virt) isVanished = true;
-                     else if((*I)->get_char()==core && (size_t)(I-ind.begin()) <  (ten_E->get_indices().size())/2) 
-                       ++numCore.first;
-                     else if((*I)->get_char()==core && (size_t)(I-ind.begin()) >= (ten_E->get_indices().size())/2) 
-                       ++numCore.second;
+                     if((*I)->get_char() == Femto::virt) isVanished = true;
+//                      else if((*I)->get_char()==core && (size_t)(I-ind.begin()) <  (ten_E->get_indices().size())/2) 
+//                        ++numCore.first;
+//                      else if((*I)->get_char()==core && (size_t)(I-ind.begin()) >= (ten_E->get_indices().size())/2) 
+//                        ++numCore.second;
+// 		     else if((*I)->get_char() == Femto::gen) hasGen = true;
                      if(isVanished) break;
 		   } // End I
-                   if(numCore.first != numCore.second) isVanished = true;
+                   //if(numCore.first != numCore.second && !hasGen) isVanished = true;
                  } // End if
                  if(!isVanished)
                    { iter_terms.push_back(SQterm((-1.0) * t->get_numConst(), term1.get_Consts(), tensorList)); }
@@ -477,7 +485,6 @@ namespace Femto { namespace Core {
 
    } // End t
    
-   // 
    inTerms->insert(inTerms->end(), iter_terms.begin()+Count, iter_terms.end());
 
    return;
