@@ -4,7 +4,7 @@
 //  Small template that hold a stream of objects like SQtensor and so on.
 //
 //  Created by Masaaki Saitow on 14/04/10.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Masaaki Saitow. All rights reserved.
 //
 
 #pragma once
@@ -26,7 +26,7 @@ namespace Femto {
   { return std::for_each(cont.begin(), cont.end(), func); }
 
   //////////////////////////////////////////////////
-  // Standard container template used in libFemto
+  // Standard container template used in libfemto
   //////////////////////////////////////////////////
   template<class T>
   class SQcont{
@@ -111,15 +111,15 @@ namespace Femto {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////// Interfaces ////////////////////////////////////////
-    typename std::vector<T>::iterator begin()  { return p_.begin();  }
-    typename std::vector<T>::iterator end()    { return p_.end();    }
-    typename std::vector<T>::iterator rbegin() { return p_.rbegin(); }
-    typename std::vector<T>::iterator rend()   { return p_.rend();   }
+    typename std::vector<T>::iterator         begin()  { return p_.begin();  }
+    typename std::vector<T>::iterator         end()    { return p_.end();    }
+    typename std::vector<T>::reverse_iterator rbegin() { return p_.rbegin(); }
+    typename std::vector<T>::reverse_iterator rend()   { return p_.rend();   }
 
     typename std::vector<T>::const_iterator cbegin()  const { return p_.cbegin();  }
     typename std::vector<T>::const_iterator cend()    const { return p_.cend();    }
-    typename std::vector<T>::const_iterator rbegin() const { return p_.rbegin(); }
-    typename std::vector<T>::const_iterator rend()   const { return p_.rend();   }
+    typename std::vector<T>::const_reverse_iterator rbegin() const { return p_.rbegin(); }
+    typename std::vector<T>::const_reverse_iterator rend()   const { return p_.rend();   }
 
     typename std::vector<T>::iterator erase(typename std::vector<T>::iterator t) { return p_.erase(t); }
 
@@ -153,6 +153,7 @@ namespace Femto {
     int count(T const & t);
     SQcont<T> &operator <= (T const & t); 
     SQcont<T> &operator += (SQcont<T> & ts); 
+    //SQcont<T> &operator += (SQcont<T>   ts); 
     SQcont<T> &operator +  (SQcont<T> & t) { SQcont<T> out(p_); out += t; return out;}
 
     SQcont<T> diff_set(SQcont<T> & t);
@@ -165,7 +166,7 @@ namespace Femto {
   template <class T>
   std::ostream & operator <<= (std::ostream &os, SQcont<T> const &t);
   
-} // Femto 
+} // femto 
 
 // :::::::::: Implementation ::::::::::
 namespace Femto {
@@ -190,6 +191,16 @@ namespace Femto {
     insert(p_.end(), ts.p().begin(), ts.p().end());
     return *this;
   }
+
+///  // *********************************************************
+///  // 
+///  // *********************************************************
+///  template <class T>
+///  SQcont<T> & SQcont<T>::operator += (SQcont<T> ts)
+///  {
+///    insert(p_.end(), ts.p().begin(), ts.p().end());
+///    return *this;
+///  }
 
   // *********************************************************
   // 
@@ -289,6 +300,17 @@ namespace Femto {
     return outs;
   }
 
-} // Femto
+  ////////////////////////////////////////////////////////////
+  // Eliminate the duplicated member in the given SQcont<T>
+  ////////////////////////////////////////////////////////////
+  template<typename T>
+  SQcont<T> eliminate_duplicate(SQcont<T> &t)
+  {
+    SQcont<T> outs;
+    for(auto i = t.cbegin();i != t.cend();++i) if(!outs.count(*i)) outs <= *i;
+    return outs;
+  }
+
+} // femto
  
 
